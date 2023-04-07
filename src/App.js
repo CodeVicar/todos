@@ -1,24 +1,24 @@
 import React, { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import "./App.css";
+import TodoList from "./components/TodoList";
+import SearchBar from "./components/SearchBar";
+import AddTodo from "./components/AddTodo";
 
 const TodoApp = () => {
-  // State for the list of todos
+  // State variables for todos, search text, filtered todos, and new todo text
   const [todos, setTodos] = useState([]);
-  // State for the search text
   const [search, setSearch] = useState("");
-  // State for the filtered list of todos based on search text
   const [filteredTodos, setFilteredTodos] = useState([]);
-  // State for the new todo text
   const [newTodo, setNewTodo] = useState("");
 
   // Load todos from local storage when the component mounts
   useEffect(() => {
-    const storedTodos = JSON.parse(localStorage.getItem("todos")) || []; // If there are no todos in local storage, use an empty array
-    setTodos(storedTodos); // Set the todos state to the todos from local storage
-  }, []); // Only run this effect once when the component mounts
+    const storedTodos = JSON.parse(localStorage.getItem("todos")) || [];
+    setTodos(storedTodos);
+  }, []);
 
-  // Update the filtered list of todos when the todos or search text changes
+  // Update the filtered todos based on the search text
   useEffect(() => {
     const updateFilteredTodos = () => {
       const lowercasedSearch = search.toLowerCase();
@@ -36,51 +36,29 @@ const TodoApp = () => {
     localStorage.setItem("todos", JSON.stringify(todos));
   }, [todos]);
 
-  // Function to add a new todo to the list
+  // Function to add a new todo to the todos state
   const addTodo = () => {
     if (newTodo.trim()) {
-      setTodos([...todos, { id: uuidv4(), text: newTodo }]); // Add a new todo to the todos state
+      setTodos([...todos, { id: uuidv4(), text: newTodo }]);
       setNewTodo("");
     }
   };
 
-  // Function to delete a todo by its ID
+  // Function to delete a todo from the todos state
   const deleteTodo = (id) => {
-    setTodos(todos.filter((todo) => todo.id !== id)); // Remove the todo from the todos state
+    setTodos(todos.filter((todo) => todo.id !== id));
   };
 
+  // Render the UI components
   return (
     <div className="todo-app">
-      {/* Input field for search text */}
-      <div className="btns">
-        <input
-          type="text"
-          placeholder="Search"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <br />
-        {/* Input field for new todo text */}
-        <input
-          type="text"
-          placeholder="New Todo"
-          value={newTodo}
-          onChange={(e) => setNewTodo(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && addTodo()}
-        />
-        {/* Button to add a new todo */}
-        <button onClick={addTodo}>Add</button>
-      </div>
-      {/* List of filtered todos */}
-      <ul>
-        {filteredTodos.map((todo) => (
-          <li key={todo.id}>
-            {todo.text}
-            {/* Button to delete a todo */}
-            <button onClick={() => deleteTodo(todo.id)}>Delete</button>
-          </li>
-        ))}
-      </ul>
+      {/* SearchBar component for searching todos */}
+      <SearchBar search={search} setSearch={setSearch} />
+      <br />
+      {/* AddTodo component for adding new todos */}
+      <AddTodo newTodo={newTodo} setNewTodo={setNewTodo} addTodo={addTodo} />
+      {/* TodoList component for displaying filtered todos */}
+      <TodoList todos={filteredTodos} deleteTodo={deleteTodo} />
     </div>
   );
 };
